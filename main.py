@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from ttkbootstrap import Style
-
+import user
 
 
 def createGUI():
@@ -36,6 +36,7 @@ def createGUI():
 
 # Ingreso
 def loginval():
+    #Coneccion a oracle
     error("Clave incorrecta")
 
 
