@@ -1,9 +1,7 @@
-class User:
+class user:
 
-    def __init__(self, id, passwrd):
-        self.id = id
+    def __init__(self, username, passwrd):
+        self.username = username
         self.passwrd = passwrd
 
         self.connected = False
-
-        User.numUsers += 1
