@@ -58,7 +58,7 @@ def error(msg):
 # validacion
 def validacion(userlog, passwrd):
     try:
-        cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_21_3")
+        #cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_21_3")
         connection = cx_Oracle.connect(user='soporte_dba', password='soporte_dba', dsn="localhost/xe",
                                        encoding='UTF-8')
         print("db version:", connection.version)
