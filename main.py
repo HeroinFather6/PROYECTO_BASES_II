@@ -1,4 +1,5 @@
 from tkinter import *
+
 from tkinter import ttk
 import cx_Oracle
 from ttkbootstrap import Style
@@ -21,17 +22,17 @@ def createGUI():
 
     # user
     userlog = StringVar()
-    ttk.Label(login, text='usuario', font=('Helvetica', 13), textvariable=userlog).place(x=80, y=70)
-    ttk.Entry(login, width=45).place(x=83, y=93)
+    ttk.Label(login, text='Usuario', font=('Helvetica', 13)).place(x=80, y=70)
+    ttk.Entry(login, width=45, textvariable=userlog).place(x=83, y=93)
 
     # password
     passwrd = StringVar()
-    ttk.Label(login, text='Contraseña', font=('Helvetica', 13), textvariable=passwrd).place(x=80, y=120)
-    ttk.Entry(login, width=45, show="●").place(x=83, y=143)
+    ttk.Label(login, text='Contraseña', font=('Helvetica', 13)).place(x=80, y=120)
+    ttk.Entry(login, width=45, show="●", textvariable=passwrd).place(x=83, y=143)
 
     # Boton
     ttk.Button(login, text='Ingresar', style='warning.Outline.TButton',
-               command=lambda: loginval(userlog, passwrd)).place(x=210, y=200)
+               command=lambda: loginval(userlog.get(), passwrd.get())).place(x=210, y=200)
     # init
     login.mainloop()
 
@@ -39,6 +40,7 @@ def createGUI():
 # Ingreso
 def loginval(userlog, passwrd):
     # Coneccion a oracle
+    validacion(userlog, passwrd)
     error("Clave incorrecta")
 
 
@@ -55,10 +57,15 @@ def error(msg):
 
 # validacion
 def validacion(userlog, passwrd):
-    conn = cx_Oracle.connect(userlog+'/'+passwrd+'@xe')
+    try:
+        cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_21_3")
+        connection = cx_Oracle.connect(user='soporte_dba', password='soporte_dba', dsn="localhost/xe",
+                                       encoding='UTF-8')
+        print("db version:", connection.version)
+    except Exception as ex:
+        print(ex)
 
 
 # main
 if __name__ == "__main__":
-
     createGUI()
