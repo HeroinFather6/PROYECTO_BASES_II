@@ -6,9 +6,11 @@ from ttkbootstrap import Style
 from user import user
 
 
+# LOGIN
 def createGUI():
     # Creacion del Login
     logstyle = Style(theme='superhero')
+    global login
     login = logstyle.master
 
     # Formato
@@ -40,8 +42,12 @@ def createGUI():
 # Ingreso
 def loginval(userlog, passwrd):
     # Coneccion a oracle
-    validacion(userlog, passwrd)
-    error("Clave incorrecta")
+    if validacion(userlog, passwrd):
+        login.destroy()
+        if "cajero" in userlog:
+            cajeroGUI()
+        elif "gerente" in userlog:
+            gerenteGUI()
 
 
 # error
@@ -58,14 +64,53 @@ def error(msg):
 # validacion
 def validacion(userlog, passwrd):
     try:
-        #cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_21_3")
-        connection = cx_Oracle.connect(user='soporte_dba', password='soporte_dba', dsn="localhost/xe",
+        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="localhost/xe",
                                        encoding='UTF-8')
         print("db version:", connection.version)
+        return True
     except Exception as ex:
-        print(ex)
+        error(ex)
 
+
+# Menu cajero
+def cajeroGUI():
+    # creacion
+    casherstyle = Style(theme='superhero')
+    global casher
+    casher = casherstyle.master
+
+    # Formato
+    casher.title("Sistema de Control de Inventario - Cajero")
+    casher.iconbitmap("inv.ico")
+    casher.geometry('800x500')
+    casher.resizable(width=False, height=False)
+
+    # Labels y entries
+    ttk.Label(casher, text='CAJERO', font=('Helvetica', 15)).pack()
+
+    # init
+    casher.mainloop()
+
+# Menu gerente
+def gerenteGUI():
+    # creacion
+    gerentestyle = Style(theme='superhero')
+    global gerente
+    gerente = gerentestyle.master
+
+    # Formato
+    gerente.title("Sistema de Control de Inventario - Modulo gerencial")
+    gerente.iconbitmap("inv.ico")
+    gerente.geometry('800x500')
+    gerente.resizable(width=False, height=False)
+
+    # Labels y entries
+    ttk.Label(gerente, text='MODULO GERENCIAL', font=('Helvetica', 15)).pack()
+
+    # init
+    gerente.mainloop()
 
 # main
 if __name__ == "__main__":
+    cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_12_2")
     createGUI()
