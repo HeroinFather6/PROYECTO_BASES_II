@@ -65,7 +65,7 @@ def error(msg):
 # validacion
 def validacion(userlog, passwrd):
     try:
-        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="localhost/xe",
+        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="10.0.2.15/xe",
                                        encoding='UTF-8')
         print("db version:", connection.version)
         return True
