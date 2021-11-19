@@ -62,9 +62,11 @@ def error(msg):
     err.mainloop()
 
 
+connection = None
 # validacion
 def validacion(userlog, passwrd):
     try:
+        global connection
         connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="10.0.2.15/xe",
                                        encoding='UTF-8')
         print("db version:", connection.version)
@@ -72,6 +74,14 @@ def validacion(userlog, passwrd):
     except Exception as ex:
         error(ex)
 
+# este mètodo recibe por paràmetro la consulta y la ejecuta y devuelve el resultado
+def consultarProducto(consulta):
+    global connection
+    cursor = connection.cursor()
+    cursor.execute(consulta)
+    # Obtener información de devolución
+    data = cursor.fetchall()
+    return data
 
 # Menu cajero
 def cajeroGUI():
@@ -95,7 +105,7 @@ def cajeroGUI():
     ttk.Label(casher, text='TOTAL:', font=('Helvetica', 15)).place(x=60, y=450)
     ttk.Entry(casher, width=20, textvariable=total).place(x=150, y=450)
     # codigo
-    code = IntVar()
+    code = StringVar()
     ttk.Label(casher, text='Codigo', font=('Helvetica', 12)).place(x=520, y=45)
     ttk.Entry(casher, width=20, textvariable=code).place(x=600, y=45)
     # cantidad
@@ -103,17 +113,40 @@ def cajeroGUI():
     ttk.Label(casher, text='Cantidad', font=('Helvetica', 12)).place(x=520, y=90)
     ttk.Entry(casher, width=20, textvariable=cant).place(x=600, y=90)
     # listbox
-    box = tk.Listbox(casher, width=35, height=20).place(x=40, y=60)
+    box = tk.Listbox(casher, width=35, height=20)
+    box.place(x=40, y=60)
     # pago
     pago = IntVar()
     ttk.Label(casher, text='Paga con:', font=('Helvetica', 12)).place(x=520, y=300)
     ttk.Entry(casher, width=20, textvariable=pago).place(x=600, y=300)
     ttk.Button(casher, text='Pagar', width=12, style='danger.TButton').place(x=600, y=350)
     # carrito
-    ttk.Button(casher, text='Agregar', width=12, style='warning.TButton').place(x=600, y=150)
+    ttk.Button(casher, text='Agregar', width=12, style='warning.TButton',
+               command=lambda: agregarProducto(box, code.get(), total)).place(x=600, y=150)
 
     # init
     casher.mainloop()
+
+def agregarProducto(box, codigo, total):
+    datos = None
+    try:
+        datos = consultarProducto('select ean,descripcion,precio from soporte_dba.producto where ean='+codigo)
+        if len(datos) != 0:
+            box.insert(0, datos)
+            total.set(total.get() + datos[0][2])
+            return
+    except Exception as ex:
+        print(ex)
+
+    try:
+        datos = consultarProducto('select plu,descripcion,precio from soporte_dba.producto_fresco where plu='+codigo)
+        if len(datos) != 0:
+            box.insert(0, datos)
+            total.set(total.get() + datos[0][2])
+
+    except Exception as ex:
+        print(ex)
+
 
 
 # Menu gerente
