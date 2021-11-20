@@ -76,7 +76,7 @@ connection = None
 def validacion(userlog, passwrd):
     try:
         global connection
-        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="10.0.2.15/xe",
+        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="DESKTOP-P1PPC5T/xe",
                                        encoding='UTF-8')
         print("db version:", connection.version)
         return True
@@ -108,6 +108,11 @@ def addProduct(consulta):
     cursor.execute(consulta)
     connection.commit()
 
+def deleteProduct(consulta):
+    global connection
+    cursor = connection.cursor()
+    cursor.execute(consulta)
+    connection.commit()
 
 listaProductos = []
 
@@ -219,6 +224,15 @@ def insertaProducto(codigo, descripcion, peso, cantidad, precio,  tipo):
         peso.set("")
         cantidad.set("")
         precio.set("")
+        tipo.set("")
+def eliminarProducto(codigo, tipo):
+    if tipo.get() == 'fresco':
+        consulta = deleteProduct('delete from soporte_dba.producto_fresco where plu='+codigo.get())
+        codigo.set("")
+        tipo.set("")
+    elif tipo.get() == 'seco':
+        consulta = deleteProduct('delete from soporte_dba.producto where ean='+codigo.get())
+        codigo.set("")
         tipo.set("")
 
 
@@ -414,11 +428,14 @@ def delGUI(gui):
     delt.resizable(width=False, height=False)
     # labels y entries
     cod = StringVar()
-    ttk.Label(delt, text='Ingrese el codigo del producto',
-              font=('Helvetica', 10)).place(x=60, y=35)
-    ttk.Entry(delt, width=20, textvariable=cod).place(x=72, y=60)
-    ttk.Button(delt, text='Consultar', width=22,
-               style='danger.TButton').place(x=60, y=100)
+    ttk.Label(delt, text='Ingrese el codigo del producto', font=('Helvetica', 10)).place(x=60, y=35)
+    ttk.Entry(delt, width=20, textvariable=cod).place(x=72, y=70)
+    tipo = StringVar()
+    ttk.Label(delt, text='El produco es fresco o seco', font=('Helvetica', 10)).place(x=60, y=100)
+    ttk.Entry(delt, width=20, textvariable=tipo).place(x=72, y=140)
+
+    ttk.Button(delt, text='Eliminar', width=22, style='success.TButton',
+               command=lambda: eliminarProducto(cod, tipo)).place(x=60, y=170)
 
     # delt.mainloop()
 
@@ -431,5 +448,5 @@ def menu(gui):
 
 # main
 if __name__ == "__main__":
-    cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_12_2")
+    cx_Oracle.init_oracle_client(lib_dir=r"C:\Program Files\Oracle\instantclient_21_3")
     createGUI()
