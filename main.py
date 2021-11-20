@@ -89,6 +89,11 @@ def updateProducto(consulta):
     cursor = connection.cursor()
     cursor.execute(consulta)
     connection.commit()
+def addProduct(consulta):
+    global connection
+    cursor = connection.cursor()
+    cursor.execute(consulta)
+    connection.commit()
 # Menu cajero
 def cajeroGUI():
     # creacion
@@ -156,11 +161,33 @@ def modificaProducto(codigo, descripcion, cantidad):
     global user
     if "frescos" in user:
         consulta = updateProducto('update soporte_dba.producto_fresco set descripcion='+"'"+descripcion.get()+"'"+', cantidad='+cantidad.get()+' where plu='+codigo.get())
+        codigo.set("")
+        descripcion.set("")
+        cantidad.set("")
     elif "secos" in user:
         consulta = updateProducto('update soporte_dba.producto set descripcion='+"'"+descripcion.get()+"'"+', cantidad='+cantidad.get()+' where ean='+codigo.get())
-    codigo.set("")
-    descripcion.set("")
-    cantidad.set("")
+        codigo.set("")
+        descripcion.set("")
+        cantidad.set("")
+
+def insertaProducto(codigo, descripcion, peso, cantidad, precio,  tipo):
+    if tipo.get() == 'fresco':
+        consulta = addProduct('insert into soporte_dba.producto_fresco values('+codigo.get()+",'"+descripcion.get()+"',"+precio.get()+','+peso.get()+','+cantidad.get()+')')
+        codigo.set("")
+        descripcion.set("")
+        peso.set("")
+        cantidad.set("")
+        precio.set("")
+        tipo.set("")
+    elif tipo.get() == 'seco':
+        consulta = addProduct('insert into soporte_dba.producto values('+codigo.get()+",'"+descripcion.get()+"',"+precio.get()+','+cantidad.get()+')')
+        codigo.set("")
+        descripcion.set("")
+        peso.set("")
+        cantidad.set("")
+        precio.set("")
+        tipo.set("")
+
 # Menu gerente
 def gerenteGUI():
     # creacion
@@ -208,13 +235,15 @@ def adminGUI():
     ttk.Button(admin, text='Editar', width=22, style='warning.TButton',
                command=lambda: editGUI(admin)).place(x=58, y=80)
     ttk.Button(admin, text='Borrar', width=22, style='primary.TButton',
-               command=lambda: editGUI(admin)).place(x=58, y=120)
+               command=lambda: delGUI(admin)).place(x=58, y=120)
     ttk.Button(admin, text='Salir', width=22, style='danger.TButton',
                command=lambda: menu(admin)
                ).place(x=58, y=200)
 
     # init
     admin.mainloop()
+
+
 
 
 # insertar
@@ -241,7 +270,7 @@ def insertGUI(gui):
     ttk.Entry(ins, width=20, textvariable=desc).place(x=72, y=112)
 
     peso = StringVar()
-    ttk.Label(ins, text='Ingrese peso del producto', font=('Helvetica', 10)).place(x=69, y=144)
+    ttk.Label(ins, text='Ingrese peso del producto(si es fresco)', font=('Helvetica', 10)).place(x=69, y=144)
     ttk.Entry(ins, width=20, textvariable=peso).place(x=72, y=164)
 
     cantidad = StringVar()
@@ -252,14 +281,14 @@ def insertGUI(gui):
     ttk.Label(ins, text='Ingrese precio del producto', font=('Helvetica', 10)).place(x=69, y=224)
     ttk.Entry(ins, width=20, textvariable=precio).place(x=72, y=244)
 
-    cod_cat = StringVar()
-    ttk.Label(ins, text='Ingrese codigo de categoria del producto', font=('Helvetica', 10)).place(x=39, y=266)
-    ttk.Entry(ins, width=20, textvariable=cod_cat).place(x=72, y=289)
+    tipo = StringVar()
+    ttk.Label(ins, text='Ingrese si el producto es fresco o seco', font=('Helvetica', 10)).place(x=39, y=266)
+    ttk.Entry(ins, width=20, textvariable=tipo).place(x=72, y=289)
 
-    ttk.Button(ins, text='Registrar', width=22, style='success.TButton').place(x=60, y=330)
+    ttk.Button(ins, text='Registrar', width=22, style='success.TButton',
+               command=lambda: insertaProducto(cod, desc, peso, cantidad, precio, tipo)).place(x=60, y=340)
 
     ins.mainloop()
-
 
 # consultar
 def consultaGUI(gui):
@@ -324,11 +353,11 @@ def delGUI(gui):
     delt.resizable(width=False, height=False)
     # labels y entries
     cod = StringVar()
-    ttk.Label(edit, text='Ingrese el codigo del producto', font=('Helvetica', 10)).place(x=60, y=35)
-    ttk.Entry(edit, width=20, textvariable=cod).place(x=72, y=60)
-    ttk.Button(edit, text='Consultar', width=22, style='danger.TButton').place(x=60, y=100)
+    ttk.Label(delt, text='Ingrese el codigo del producto', font=('Helvetica', 10)).place(x=60, y=35)
+    ttk.Entry(delt, width=20, textvariable=cod).place(x=72, y=60)
+    ttk.Button(delt, text='Consultar', width=22, style='danger.TButton').place(x=60, y=100)
 
-    delt.mainloop()
+    #delt.mainloop()
 
 
 # exit
