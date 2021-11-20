@@ -4,7 +4,7 @@ from tkinter import ttk
 import cx_Oracle
 from ttkbootstrap import Style
 
-
+user = None
 # LOGIN
 def createGUI():
     # Creacion del Login
@@ -40,6 +40,8 @@ def createGUI():
 
 # Ingreso
 def loginval(userlog, passwrd):
+    global user
+    user = userlog
     # Coneccion a oracle
     if validacion(userlog, passwrd):
         login.destroy()
@@ -67,7 +69,7 @@ connection = None
 def validacion(userlog, passwrd):
     try:
         global connection
-        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="10.0.2.15/xe",
+        connection = cx_Oracle.connect(user=userlog, password=passwrd, dsn="DESKTOP-P1PPC5T/xe",
                                        encoding='UTF-8')
         print("db version:", connection.version)
         return True
@@ -82,7 +84,11 @@ def consultarProducto(consulta):
     # Obtener información de devolución
     data = cursor.fetchall()
     return data
-
+def updateProducto(consulta):
+    global connection
+    cursor = connection.cursor()
+    cursor.execute(consulta)
+    connection.commit()
 # Menu cajero
 def cajeroGUI():
     # creacion
@@ -146,9 +152,15 @@ def agregarProducto(box, codigo, total):
 
     except Exception as ex:
         print(ex)
-
-
-
+def modificaProducto(codigo, descripcion, cantidad):
+    global user
+    if "frescos" in user:
+        consulta = updateProducto('update soporte_dba.producto_fresco set descripcion='+"'"+descripcion.get()+"'"+', cantidad='+cantidad.get()+' where plu='+codigo.get())
+    elif "secos" in user:
+        consulta = updateProducto('update soporte_dba.producto set descripcion='+"'"+descripcion.get()+"'"+', cantidad='+cantidad.get()+' where ean='+codigo.get())
+    codigo.set("")
+    descripcion.set("")
+    cantidad.set("")
 # Menu gerente
 def gerenteGUI():
     # creacion
@@ -285,18 +297,17 @@ def editGUI(gui):
     edit.geometry('300x500')
     edit.resizable(width=False, height=False)
     # label y entries
-    cod = StringVar()
+    codigo = StringVar()
+    descripcion = StringVar()
+    cantidad = StringVar()
     ttk.Label(edit, text='Ingrese el codigo del producto', font=('Helvetica', 10)).place(x=60, y=35)
-    ttk.Entry(edit, width=20, textvariable=cod).place(x=72, y=60)
-
-    ttk.Button(edit, text='Consultar', width=22, style='success.TButton').place(x=60, y=100)
-    # if metodobuscar(cod) :
-    #   entry metodobuscar(cod).id
-    #    *
-    #    *
-    #    *
-    # else
-    #    error("No se encuentra el producto")
+    ttk.Entry(edit, width=20, textvariable=codigo).place(x=72, y=70)
+    ttk.Label(edit, text='Ingrese el descripcion del producto', font=('Helvetica', 10)).place(x=60, y=105)
+    ttk.Entry(edit, width=20, textvariable=descripcion).place(x=72, y=140)
+    ttk.Label(edit, text='Ingrese el cantidad del producto', font=('Helvetica', 10)).place(x=60, y=175)
+    ttk.Entry(edit, width=20, textvariable=cantidad).place(x=72, y=205)
+    ttk.Button(edit, text='Actualizar', width=22, style='success.TButton',
+               command=lambda:modificaProducto(codigo,descripcion,cantidad) ).place(x=60, y=240)
 
 
 # borrar
@@ -328,5 +339,5 @@ def menu(gui):
 
 # main
 if __name__ == "__main__":
-    cx_Oracle.init_oracle_client(lib_dir=r"C:\oraclexe\instantclient_12_2")
+    cx_Oracle.init_oracle_client(lib_dir=r"C:\Program Files\Oracle\instantclient_21_3")
     createGUI()
