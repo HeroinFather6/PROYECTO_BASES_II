@@ -4,7 +4,7 @@ from tkinter import ttk
 import cx_Oracle
 from ttkbootstrap import Style
 
-
+user = None
 # LOGIN
 def createGUI():
     # Creacion del Login
@@ -41,6 +41,8 @@ def createGUI():
 # Ingreso
 def loginval(userlog, passwrd):
     # Coneccion a oracle
+    global user
+    user = userlog
     if validacion(userlog, passwrd):
         login.destroy()
         if "cajero" in userlog:
@@ -87,6 +89,10 @@ def updateProducto(consulta):
     cursor = connection.cursor()
     cursor.execute(consulta)
     connection.commit()
+
+
+listaProductos=[]
+
 # Menu cajero
 def cajeroGUI():
     # creacion
@@ -123,7 +129,8 @@ def cajeroGUI():
     pago = IntVar()
     ttk.Label(casher, text='Paga con:', font=('Helvetica', 12)).place(x=520, y=300)
     ttk.Entry(casher, width=20, textvariable=pago).place(x=600, y=300)
-    ttk.Button(casher, text='Pagar', width=12, style='danger.TButton').place(x=600, y=350)
+    ttk.Button(casher, text='Pagar', width=12, style='danger.TButton',
+               command=lambda: cobrar(box)).place(x=600, y=350)
     # carrito
     ttk.Button(casher, text='Agregar', width=12, style='warning.TButton',
                command=lambda: agregarProducto(box, code.get(), total)).place(x=600, y=150)
@@ -134,7 +141,7 @@ def cajeroGUI():
 def agregarProducto(box, codigo, total):
     datos = None
     try:
-        datos = consultarProducto('select ean,descripcion,precio from soporte_dba.producto where ean='+codigo)
+        datos = consultarProducto('select ean,descripcion,precio, cantidad from soporte_dba.producto where ean='+codigo)
         if len(datos) != 0:
             box.insert(0, datos)
             total.set(total.get() + datos[0][2])
@@ -143,7 +150,7 @@ def agregarProducto(box, codigo, total):
         print(ex)
 
     try:
-        datos = consultarProducto('select plu,descripcion,precio from soporte_dba.producto_fresco where plu='+codigo)
+        datos = consultarProducto('select plu,descripcion,precio, cantidad from soporte_dba.producto_fresco where plu='+codigo)
         if len(datos) != 0:
             box.insert(0, datos)
             total.set(total.get() + datos[0][2])
@@ -161,9 +168,16 @@ def modificaProducto(codigo, descripcion, cantidad):
     cantidad.set("")
 
 
-def cobrar():
-    pass
+def cobrar(list):
+    data = list.get(0, tk.END)
+    global user
+    for row in data:
+        cantidad = row[0][3]
+        cantidad -= 1
+        updateProducto('update soporte_dba.producto_fresco set cantidad=' + str(cantidad) + ' where plu=' + str(row[0][0]))
+        updateProducto('update soporte_dba.producto set cantidad=' + str(cantidad) + ' where ean=' + str(row[0][0]))
 
+    list.delete(0, tk.END)
 
 # Menu gerente
 def gerenteGUI():
