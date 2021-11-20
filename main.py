@@ -82,7 +82,11 @@ def consultarProducto(consulta):
     # Obtener información de devolución
     data = cursor.fetchall()
     return data
-
+def updateProducto(consulta):
+    global connection
+    cursor = connection.cursor()
+    cursor.execute(consulta)
+    connection.commit()
 # Menu cajero
 def cajeroGUI():
     # creacion
@@ -110,8 +114,8 @@ def cajeroGUI():
     ttk.Entry(casher, width=20, textvariable=code).place(x=600, y=45)
     # cantidad
     cant = IntVar()
-    #ttk.Label(casher, text='Cantidad', font=('Helvetica', 12)).place(x=520, y=90)
-    #ttk.Entry(casher, width=20, textvariable=cant).place(x=600, y=90)
+    ttk.Label(casher, text='Cantidad', font=('Helvetica', 12)).place(x=520, y=90)
+    ttk.Entry(casher, width=20, textvariable=cant).place(x=600, y=90)
     # listbox
     box = tk.Listbox(casher, width=35, height=20)
     box.place(x=40, y=60)
@@ -146,6 +150,15 @@ def agregarProducto(box, codigo, total):
 
     except Exception as ex:
         print(ex)
+def modificaProducto(codigo, descripcion, cantidad):
+    global user
+    if "frescos" in user:
+        consulta = updateProducto('update soporte_dba.producto_fresco set descripcion='+"'"+descripcion.get()+"'"+', cantidad='+cantidad.get()+' where plu='+codigo.get())
+    elif "secos" in user:
+        consulta = updateProducto('update soporte_dba.producto set descripcion='+"'"+descripcion.get()+"'"+', cantidad='+cantidad.get()+' where ean='+codigo.get())
+    codigo.set("")
+    descripcion.set("")
+    cantidad.set("")
 
 
 def cobrar():
@@ -288,18 +301,17 @@ def editGUI(gui):
     edit.geometry('300x500')
     edit.resizable(width=False, height=False)
     # label y entries
-    cod = StringVar()
+    codigo = StringVar()
+    descripcion = StringVar()
+    cantidad = StringVar()
     ttk.Label(edit, text='Ingrese el codigo del producto', font=('Helvetica', 10)).place(x=60, y=35)
-    ttk.Entry(edit, width=20, textvariable=cod).place(x=72, y=60)
-
-    ttk.Button(edit, text='Consultar', width=22, style='success.TButton').place(x=60, y=100)
-    # if metodobuscar(cod) :
-    #   entry metodobuscar(cod).id
-    #    *
-    #    *
-    #    *
-    # else
-    #    error("No se encuentra el producto")
+    ttk.Entry(edit, width=20, textvariable=codigo).place(x=72, y=70)
+    ttk.Label(edit, text='Ingrese el descripcion del producto', font=('Helvetica', 10)).place(x=60, y=105)
+    ttk.Entry(edit, width=20, textvariable=descripcion).place(x=72, y=140)
+    ttk.Label(edit, text='Ingrese el cantidad del producto', font=('Helvetica', 10)).place(x=60, y=175)
+    ttk.Entry(edit, width=20, textvariable=cantidad).place(x=72, y=205)
+    ttk.Button(edit, text='Actualizar', width=22, style='success.TButton',
+               command=lambda:modificaProducto(codigo,descripcion,cantidad) ).place(x=60, y=240)
 
 
 # borrar
