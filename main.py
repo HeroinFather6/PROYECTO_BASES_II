@@ -110,8 +110,8 @@ def cajeroGUI():
     ttk.Entry(casher, width=20, textvariable=code).place(x=600, y=45)
     # cantidad
     cant = IntVar()
-    ttk.Label(casher, text='Cantidad', font=('Helvetica', 12)).place(x=520, y=90)
-    ttk.Entry(casher, width=20, textvariable=cant).place(x=600, y=90)
+    #ttk.Label(casher, text='Cantidad', font=('Helvetica', 12)).place(x=520, y=90)
+    #ttk.Entry(casher, width=20, textvariable=cant).place(x=600, y=90)
     # listbox
     box = tk.Listbox(casher, width=35, height=20)
     box.place(x=40, y=60)
@@ -147,6 +147,9 @@ def agregarProducto(box, codigo, total):
     except Exception as ex:
         print(ex)
 
+
+def cobrar():
+    pass
 
 
 # Menu gerente
